@@ -1,0 +1,53 @@
+package toolbox;
+
+import entities.Camera;
+import org.lwjgl.util.vector.Matrix4f;
+import org.lwjgl.util.vector.Vector3f;
+
+public class Maths {
+
+    public static Matrix4f createTransformationMatrix(Vector3f translation, float rx, float ry, float rz, float scale) {
+        Matrix4f matrix = new Matrix4f();
+        //matrix.setIdentity();
+        Matrix4f.translate(translation, matrix, matrix);
+        Matrix4f.rotate((float) Math.toRadians(rx), new Vector3f(1, 0, 0), matrix, matrix);
+        Matrix4f.rotate((float) Math.toRadians(ry), new Vector3f(0, 1, 0), matrix, matrix);
+        Matrix4f.rotate((float) Math.toRadians(rz), new Vector3f(0, 0, 1), matrix, matrix);
+        Matrix4f.scale(new Vector3f(scale, scale, scale), matrix, matrix);
+        return matrix;
+    }
+
+    public static Matrix4f createViewMatrix(Camera camera){
+        Matrix4f viewMatrix = new Matrix4f();
+        viewMatrix.setIdentity();
+        Matrix4f.rotate((float) Math.toRadians(camera.getPitch()), new Vector3f(1,0,0), viewMatrix, viewMatrix);
+        Matrix4f.rotate((float) Math.toRadians(camera.getYaw()), new Vector3f(0,1,0), viewMatrix, viewMatrix);
+        Matrix4f.rotate((float) Math.toRadians(camera.getRoll()), new Vector3f(0,0,1), viewMatrix, viewMatrix);
+        Vector3f cameraPos = camera.getPosition();
+        Vector3f negativeCameraPos = new Vector3f(-cameraPos.x,-cameraPos.y,-cameraPos.z);
+        Matrix4f.translate(negativeCameraPos, viewMatrix, viewMatrix); return viewMatrix;
+    }
+
+
+    public static Vector3f rotateVector(Vector3f vector, Vector3f axis, double theta){
+        float x = vector.getX();
+        float y = vector.getY();
+        float z = vector.getZ();
+
+        float u = axis.getX();
+        float v = axis.getY();
+        float w = axis.getZ();
+
+        double xPrime = u*(u*x + v*y + w*z)*(1f - Math.cos(theta))
+                + x*Math.cos(theta)
+                + (-w*y + v*z)*Math.sin(theta);
+        double yPrime = v*(u*x + v*y + w*z)*(1f - Math.cos(theta))
+                + y*Math.cos(theta)
+                + (w*x - u*z)*Math.sin(theta);
+        double zPrime = w*(u*x + v*y + w*z)*(1f - Math.cos(theta))
+                + z*Math.cos(theta)
+                + (-v*x + u*y)*Math.sin(theta);
+
+        return new Vector3f((float) xPrime, (float)yPrime, (float)zPrime);
+    }
+}
